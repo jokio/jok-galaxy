@@ -89,13 +89,13 @@ Game.Server.prototype.ondisconnect = function(client, code, message) {
 	this._removePlayer(player.getId());
 }
 
-Game.Server.prototype.onmessage = function(client, data) {
+Game.Server.prototype.onmessage = function(client, data, nick) {
 
 	var parsed = JSON.parse(data);
 	switch (parsed.type) {
 		case Game.MSG_CREATE_PLAYER:
 			for (var id in parsed.data) {
-				var playerData = parsed.data[id];
+			    var playerData = parsed.data[id];
 
 				if (id in this._players) {
 					this._debug("[create player] cannot re-create player " + this._players[id].getName());
@@ -109,7 +109,7 @@ Game.Server.prototype.onmessage = function(client, data) {
 				}
 				
 				this._debug("[create player] creating player " + JSON.stringify(playerData));
-				var player = this._addPlayer(Player, playerData.name, id); 
+				var player = this._addPlayer(Player, nick, id);
 				player.setShipOptions(playerData.shipOptions); 
 				this._clientPlayers[index] = player;	
 			}

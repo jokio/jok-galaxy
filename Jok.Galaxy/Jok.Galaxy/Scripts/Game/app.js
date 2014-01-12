@@ -10,12 +10,12 @@ var cookieParser = require('cookie');
 var port = process.env.PORT || 9003;
 
 var $ = {
-    get: function (url, cb) {
+    get: function (url, cb, io) {
 
         if (!cb) cb = function () { };
 
         var options = {
-            hostname: 'api.jok.ge',
+            hostname: io ? 'api.jok.io' : 'api.jok.ge',
             port: 80,
             path: url,
             method: 'GET'
@@ -85,8 +85,10 @@ ws.initialize();
 
 
 /* Web Server */
-var engine = require('engine.io')
-  , server = new engine.listen(port)
+var engine = require('engine.io');
+var server = new engine.listen(port, function () {
+    console.log('Server is listening on port ' + port);
+});
 
 
 function originIsAllowed(origin) {
@@ -118,9 +120,9 @@ server.on('connection', function (socket) {
     if (!ipaddress)
         ipaddress = socket.transport.request.connection.remoteAddress;
 
-    $.get('/user/' + sid + '/getinfo?gameid=10&ipaddress=' + ipaddress, function (result) {
+    $.get('/User/InfoBySID?sid=' + sid + '&ipAddress=' + ipaddress, function (result) {
 
-        if (!result || !result.IsSuccess) {
+        if (!result || !result.IsSuccess || !result.UserID) {
             return;
         }
 
@@ -128,12 +130,12 @@ server.on('connection', function (socket) {
         var connection = socket; //request.accept(null, request.origin);
         var isDisconnected = false;
 
-
         connection.userid = result.UserID;
+        connection.nick = result.Nick;
         connection.clientid = Math.random().toString().replace("0.", "");
         clients[connection.clientid] = connection;
 
-        ws.gameServer.onconnect(connection.clientid, undefined/*request.httpRequest.headers*/);
+        ws.gameServer.onconnect(connection.clientid, socket.transport.request.headers);
 
 
         connection.on('message', function (message) {
@@ -141,7 +143,7 @@ server.on('connection', function (socket) {
                 console.log('Received Message: ' + message);
             }
 
-            ws.gameServer.onmessage(connection.clientid, message);
+            ws.gameServer.onmessage.call(ws.gameServer, connection.clientid, message, connection.nick);
         });
         connection.on('close', function (reasonCode, description) {
             isDisconnected = true;
@@ -157,9 +159,8 @@ server.on('connection', function (socket) {
         });
         connection.on('error', function (err) {
             isDisconnected = true;
-            // console.log('error: [' + connection.clientid + '] ' + err);
         });
-    });
+    }, true);
 });
 
 

@@ -2,7 +2,7 @@
  * Client-side (browser) game class
  */
 Game.Client = OZ.Class().extend(Game);
-Game.Client.prototype.init = function(playerName, playerShipOptions) {
+Game.Client.prototype.init = function(playerName, playerShipOptions, playerid) {
 	this._port = [0, 0];
 	this._offset = [0, 0];
 	this._player = null;
@@ -14,7 +14,7 @@ Game.Client.prototype.init = function(playerName, playerShipOptions) {
 
 	this._keyboard = new Keyboard();
 	this._initDebug(true);
-	this._initPlayer(playerName, playerShipOptions);
+	this._initPlayer(playerName, playerShipOptions, playerid);
 }
 
 Game.Client.prototype.start = function() {
@@ -104,8 +104,8 @@ Game.Client.prototype._initDebug = function(chart) {
 	document.body.appendChild(monitor2);
 }
 
-Game.Client.prototype._initPlayer = function(name, shipOptions) {
-	this._player = this._addPlayer(Player.Human, name).setShipOptions(shipOptions);
+Game.Client.prototype._initPlayer = function(name, shipOptions, id) {
+    this._player = this._addPlayer(Player.Human, name, id).setShipOptions(shipOptions);
 }
 
 Game.Client.prototype._shipCreate = function(e) {}
