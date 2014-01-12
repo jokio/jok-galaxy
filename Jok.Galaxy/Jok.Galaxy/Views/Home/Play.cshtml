@@ -1,0 +1,37 @@
+﻿@{
+    Layout = null;
+}
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Galaxy</title>
+
+    <link rel="stylesheet" type="text/css" href="http://play.jok.io/css" />
+    @Styles.Render("~/Styles/css")
+
+    @Scripts.Render("~/Scripts/js")
+    @Scripts.Render("~/Scripts/Game/js")
+
+    <script>
+        var jok = {};
+
+        jok.config = {
+            gameid: '10',
+            channel: '',
+            language: 'en_US',
+            exitUrl: 'http://jok.io/lobby/galaxy',
+            authorizationUrl: 'http://jok.io/joinus?returnUrl=http://jok.io/lobby/galaxy'
+        }
+    </script>
+
+    <meta name="viewport" content="width=device-width" />
+</head>
+<body>
+    <div id="Loading">
+        <span class="percentage">0</span>%
+    </div>
+    <div id="Game"></div>
+    <script src="http://play.jok.io/js"></script>
+</body>
+</html>

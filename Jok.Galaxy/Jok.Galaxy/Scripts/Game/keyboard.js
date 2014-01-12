@@ -1,0 +1,113 @@
+var Keyboard = OZ.Class();
+
+Keyboard.prototype.init = function() {
+	this._control = null;
+	OZ.Event.add(window, "keydown", this._keydown.bind(this));
+	OZ.Event.add(window, "keyup", this._keyup.bind(this));
+}
+
+Keyboard.prototype.setControl = function(control) {
+	this._control = control;
+
+	if (control == null)
+		activeKeys.splice(0, activeKeys.length);
+}
+
+var activeKeys = [];
+
+Keyboard.prototype._keydown = function(e) {
+	if (!this._control) { return; }
+	
+	if (activeKeys.indexOf(e.keyCode) > -1) return;
+
+	activeKeys.push(e.keyCode);
+
+	var isNavigationChange = false;
+
+	switch (e.keyCode) {
+		case 17:
+		case 32:
+			this._control.fire = true;
+		break;
+		case 65: // A
+		case 37:
+			this._control.torque.mode = 2;
+			this._control.torque.target = -1;
+			isNavigationChange = true;
+		break;
+		case 68: // D
+		case 39:
+			this._control.torque.mode = 2;
+			this._control.torque.target = +1;
+			isNavigationChange = true;
+		break;
+		
+		case 87: // W
+		case 38: 
+			this._control.engine = 1;
+			isNavigationChange = true;
+		break;
+		case 83: // S
+		case 40:
+			this._control.engine = -1;
+			isNavigationChange = true;
+		break;
+
+		case 81: // Q
+			this._control.engine2 = -1;
+			isNavigationChange = true;
+		break;
+
+		case 69: // E
+			this._control.engine2 = +1;
+			isNavigationChange = true;
+		break;
+	}
+
+	/* FIXME jen pri zmene? */
+	this.dispatch("keyboard-change", { isNavigationChange: isNavigationChange });
+}
+
+Keyboard.prototype._keyup = function(e) {
+	if (!this._control) { return; }
+
+	var index = activeKeys.indexOf(e.keyCode);
+	if (index == -1) return;
+
+	activeKeys.splice(index, 1);
+
+	var isNavigationChange = false;
+
+
+	switch (e.keyCode) {
+		case 17:
+		case 32:
+			this._control.fire = false;
+		break;
+		
+		case 65: // A
+		case 68: // D
+		case 37:
+		case 39:
+			this._control.torque.mode = 0;
+			isNavigationChange = true;
+		break;
+		
+		case 87: // W
+		case 83: // S
+		case 38:
+		case 40:
+			this._control.engine = 0;
+			isNavigationChange = true;
+		break;
+
+
+		case 81: // Q
+		case 69: // E
+			this._control.engine2 = 0;
+			isNavigationChange = true;
+		break;
+	}
+	/* FIXME jen pri zmene? */
+	this.dispatch("keyboard-change", { isNavigationChange: isNavigationChange });
+}
