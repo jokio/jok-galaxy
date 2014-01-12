@@ -2,7 +2,8 @@
         "name": "Jok.Galaxy.Server",
         "version": "0.1.0",
         "dependencies": {
-                "engine.io" : "0.8.0"
+                "engine.io" : "0.8.0",
+		"cookie" : "*"
         },
         "engines": {
                 "node": "0.10.18",
