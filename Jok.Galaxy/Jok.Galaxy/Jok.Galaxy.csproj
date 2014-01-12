@@ -190,6 +190,8 @@
     <Content Include="Audios\neointro.ogg" />
     <Content Include="Audios\shot.ogg" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js" />
+    <Content Include="Scripts\engine.io-0.8.0.js" />
+    <Content Include="Scripts\Game\app.js" />
     <Content Include="Scripts\Game\audio.js" />
     <Content Include="Scripts\Game\background.js" />
     <Content Include="Scripts\Game\explosion.js" />
@@ -199,6 +201,7 @@
     <Content Include="Scripts\Game\game.server.js" />
     <Content Include="Scripts\Game\game.single.js" />
     <Content Include="Scripts\Game\haf.js" />
+    <Content Include="Scripts\Game\app.init.js" />
     <Content Include="Scripts\Game\keyboard.js" />
     <Content Include="Scripts\Game\label.js" />
     <Content Include="Scripts\Game\map.js" />

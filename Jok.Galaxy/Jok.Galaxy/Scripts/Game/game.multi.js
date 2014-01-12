@@ -16,7 +16,7 @@ Game.Multi.prototype.init = function(name, shipOptions, url) {
 Game.Multi.prototype.start = function() {
 	Game.Client.prototype.start.call(this);
 
-	this._socket = new (window.WebSocket || window.MozWebSocket)(this._url);
+	this._socket = new eio.Socket(this._url); //new(window.WebSocket || window.MozWebSocket)(this._url);
 	OZ.Event.add(this._socket, "open", this._open.bind(this));
 	OZ.Event.add(this._socket, "close", this._close.bind(this));
 	OZ.Event.add(this._socket, "message", this._message.bind(this));
@@ -50,7 +50,7 @@ Game.Multi.prototype._open = function(e) {
 
 Game.Multi.prototype._message = function(e) {
 
-	var data = JSON.parse(e.data);
+	var data = JSON.parse(e);
 	var currentPlayer = this._player;
 	var currentDate = new Date();
 
@@ -172,7 +172,7 @@ Game.Multi.prototype._send = function(type, data, preventSimluation) {
 	this._socket.send(objString);
 	if (preventSimluation) return;
 
-	this._message({ data: objString });
+	this._message(objString);
 }
 
 Game.Multi.prototype._keyboardChange = function(e) {

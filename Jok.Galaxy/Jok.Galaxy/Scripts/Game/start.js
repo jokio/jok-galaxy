@@ -82,7 +82,7 @@ var ui = {
 		var usernick = $.cookie('usernick') || '';
 		
 
-		var url = 'ws://galaxy.jok.io?sid=' + $.cookie('sid');
+		var url = 'ws://localhost:9003'; //?sid=' + $.cookie('sid');
 
 		game = new Game.Multi(usernick, ship, url);
 		game.start();

@@ -1,0 +1,15 @@
+{
+        "name": "Jok.Galaxy.Server",
+        "version": "0.1.0",
+        "dependencies": {
+                "engine.io" : "0.8.0"
+        },
+        "engines": {
+                "node": "0.10.18",
+                "npm": "1.1.x"
+        },
+        "scripts": {
+                "start": "node Jok.Galaxy/Jok.Galaxy/Scripts/Game/app.js",
+                "debug": "node --debug Jok.Galaxy/Jok.Galaxy/Scripts/Game/app.js"
+        }
+}

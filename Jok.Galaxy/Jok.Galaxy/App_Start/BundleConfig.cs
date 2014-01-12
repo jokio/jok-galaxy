@@ -11,7 +11,8 @@ namespace Jok.Galaxy
             bundles.Add(new ScriptBundle("~/Scripts/js").Include(
                         "~/Scripts/jquery-{version}.js",
                         "~/Scripts/bootstrap.js",
-                        "~/Scripts/respond.js"
+                        "~/Scripts/respond.js",
+                        "~/Scripts/engine.io-{version}.js"
                         ));
 
             bundles.Add(new ScriptBundle("~/Scripts/Game/js").Include(
