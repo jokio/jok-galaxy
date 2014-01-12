@@ -192,6 +192,7 @@
     <Content Include="Audios\explosion.ogg" />
     <Content Include="Audios\neointro.ogg" />
     <Content Include="Audios\shot.ogg" />
+    <None Include="Properties\PublishProfiles\Jok.Galaxy.pubxml" />
     <None Include="Scripts\jquery-2.0.3.intellisense.js" />
     <Content Include="Scripts\engine.io-0.8.0.js" />
     <Content Include="Scripts\Game\app.js" />
