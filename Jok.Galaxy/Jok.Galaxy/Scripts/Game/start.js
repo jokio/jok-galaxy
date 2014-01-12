@@ -79,7 +79,7 @@ var ui = {
 			weaponType: 0
 		};
 
-		var url = 'ws://galaxy-server.jok.io:80';
+		var url = 'ws://galaxy-server-eu.jok.io:80';
 		var url = 'ws://localhost:9003';
 
 		game = new Game.Multi(jok.config.nick, ship, url, jok.config.userID);

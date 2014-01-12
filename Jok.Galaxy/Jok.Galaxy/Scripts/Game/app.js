@@ -120,21 +120,21 @@ server.on('connection', function (socket) {
         return;
     }
 
+    socket.isDisconnected = false
+
     var ipaddress = socket.transport.request.headers['x-forwarded-for'];
     if (!ipaddress)
         ipaddress = socket.transport.request.connection.remoteAddress;
 
     $.get('/User/InfoBySID?sid=' + sid + '&ipAddress=' + ipaddress, function (result) {
 
-        if (!result || !result.IsSuccess || !result.UserID) {
+        if (!result || !result.IsSuccess || !result.UserID || socket.isDisconnected) {
             return;
         }
-
 
         socket.send(JSON.stringify({ type: Game.MSG_LOGIN_SUCCESS, user: result }));
 
         var connection = socket; //request.accept(null, request.origin);
-        connection.isDisconnected = false;
         connection.userid = result.UserID;
         connection.nick = result.Nick;
         connection.clientid = result.UserID; //Math.random().toString().replace("0.", "");
@@ -147,8 +147,8 @@ server.on('connection', function (socket) {
 
         clients[connection.clientid] = connection;
 
+        console.log(Date.now(), '[connect]')
         ws.gameServer.onconnect(connection.clientid, socket.transport.request.headers);
-
 
         connection.on('message', function (message) {
             if (process.env.ENV != 'production') {
@@ -157,31 +157,34 @@ server.on('connection', function (socket) {
 
             ws.gameServer.onmessage.call(ws.gameServer, connection.clientid, message, connection.nick);
         });
-        connection.on('close', function (reasonCode, description) {
-            console.log('[close]', reasonCode, description);
-            disconnect(connection);
-        });
-        connection.on('error', function (err) {
-            console.log('[Error]', err);
-            disconnect(connection);
-        });
-
-
-        function disconnect(conn) {
-            if (conn.isDisconnected) return;
-
-            conn.isDisconnected = true;
-
-            if (conn.clientid in clients) {
-                delete clients[conn.clientid];
-            }
-
-            if (process.env.ENV != 'production') {
-                console.log('[Disconnect] Peer ' + conn.clientid + ' disconnected.');
-            }
-            ws.gameServer.ondisconnect(conn.clientid, '', '');
-        }
     }, true);
+
+
+    socket.on('close', function (reasonCode, description) {
+        console.log('[close]', reasonCode, description);
+        disconnect(socket);
+    });
+
+    socket.on('error', function (err) {
+        console.log('[Error]', err);
+        disconnect(socket);
+    });
+
+
+    function disconnect(conn) {
+        if (conn.isDisconnected) return;
+
+        conn.isDisconnected = true;
+
+        if (conn.clientid in clients) {
+            delete clients[conn.clientid];
+        }
+
+        if (process.env.ENV != 'production') {
+            console.log(Date.now(), '[Disconnect] Peer ' + conn.clientid + ' disconnected.');
+        }
+        ws.gameServer.ondisconnect(conn.clientid, '', '');
+    }
 });
 
 

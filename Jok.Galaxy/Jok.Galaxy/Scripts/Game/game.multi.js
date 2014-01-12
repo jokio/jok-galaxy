@@ -183,7 +183,14 @@ Game.Multi.prototype._message = function (e) {
             break;
 
         case Game.MSG_PONG:
-            console.log('Latency', Date.now() - data.data);
+
+            var latency = Date.now() - data.data;
+            if (this._avgLatency)
+                this._avgLatency = Math.round((this._avgLatency + latency) / 2);
+            else
+                this._avgLatency = latency;
+
+            console.log('Latency', latency, this._avgLatency);
             break;
 
         default:
