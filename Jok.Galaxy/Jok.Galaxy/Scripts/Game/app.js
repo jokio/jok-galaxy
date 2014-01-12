@@ -134,8 +134,13 @@ server.on('connection', function (socket) {
 
         connection.userid = result.UserID;
         connection.nick = result.Nick;
-        connection.clientid = Math.random().toString().replace("0.", "");
+        connection.clientid = result.UserID; //Math.random().toString().replace("0.", "");
+        var oldClient = clients[connection.clientid];
         clients[connection.clientid] = connection;
+
+        if (oldClient) {
+            oldClient.close();
+        }
 
         ws.gameServer.onconnect(connection.clientid, socket.transport.request.headers);
 
@@ -155,7 +160,7 @@ server.on('connection', function (socket) {
             }
 
             if (process.env.ENV != 'production') {
-                console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+                console.log('[Disconnect] Peer ' + connection.clientid + ' disconnected.');
             }
             ws.gameServer.ondisconnect(connection.clientid, '', '');
         });
