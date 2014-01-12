@@ -118,8 +118,6 @@ server.on('connection', function (socket) {
     if (!ipaddress)
         ipaddress = socket.transport.request.connection.remoteAddress;
 
-    console.log('sid', sid, ipaddress);
-
     $.get('/user/' + sid + '/getinfo?gameid=10&ipaddress=' + ipaddress, function (result) {
 
         if (!result || !result.IsSuccess) {
