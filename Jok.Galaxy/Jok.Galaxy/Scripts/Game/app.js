@@ -138,6 +138,7 @@ server.on('connection', function (socket) {
         clients[connection.clientid] = connection;
 
         if (oldClient) {
+            console.log('[Reconnect]', oldClient.clientid);
             disconnect(oldClient);
             oldClient.close();
         }
@@ -147,15 +148,17 @@ server.on('connection', function (socket) {
 
         connection.on('message', function (message) {
             if (process.env.ENV != 'production') {
-                console.log('Received Message: ' + message);
+                //console.log('Received Message: ' + message);
             }
 
             ws.gameServer.onmessage.call(ws.gameServer, connection.clientid, message, connection.nick);
         });
         connection.on('close', function (reasonCode, description) {
+            console.log('[close]', reasonCode, description);
             disconnect(connection);
         });
         connection.on('error', function (err) {
+            console.log('[Error]', err);
             disconnect(connection);
         });
 
