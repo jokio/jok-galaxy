@@ -130,8 +130,7 @@ server.on('connection', function (socket) {
         socket.send(JSON.stringify({ type: Game.MSG_LOGIN_SUCCESS, user: result }));
 
         var connection = socket; //request.accept(null, request.origin);
-        var isDisconnected = false;
-
+        connection.isDisconnected = false;
         connection.userid = result.UserID;
         connection.nick = result.Nick;
         connection.clientid = result.UserID; //Math.random().toString().replace("0.", "");
@@ -139,6 +138,7 @@ server.on('connection', function (socket) {
         clients[connection.clientid] = connection;
 
         if (oldClient) {
+            disconnect(oldClient);
             oldClient.close();
         }
 
@@ -153,20 +153,27 @@ server.on('connection', function (socket) {
             ws.gameServer.onmessage.call(ws.gameServer, connection.clientid, message, connection.nick);
         });
         connection.on('close', function (reasonCode, description) {
-            isDisconnected = true;
+            disconnect(connection);
+        });
+        connection.on('error', function (err) {
+            disconnect(connection);
+        });
 
-            if (connection.clientid in clients) {
-                delete clients[connection.clientid];
+
+        function disconnect(conn) {
+            if (conn.isDisconnected) return;
+
+            conn.isDisconnected = true;
+
+            if (conn.clientid in clients) {
+                delete clients[conn.clientid];
             }
 
             if (process.env.ENV != 'production') {
-                console.log('[Disconnect] Peer ' + connection.clientid + ' disconnected.');
+                console.log('[Disconnect] Peer ' + conn.clientid + ' disconnected.');
             }
-            ws.gameServer.ondisconnect(connection.clientid, '', '');
-        });
-        connection.on('error', function (err) {
-            isDisconnected = true;
-        });
+            ws.gameServer.ondisconnect(conn.clientid, '', '');
+        }
     }, true);
 });
 
