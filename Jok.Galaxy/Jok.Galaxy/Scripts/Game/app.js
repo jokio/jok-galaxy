@@ -127,6 +127,8 @@ server.on('connection', function (socket) {
         }
 
 
+        socket.send(JSON.stringify({ type: Game.MSG_LOGIN_SUCCESS, user: result }));
+
         var connection = socket; //request.accept(null, request.origin);
         var isDisconnected = false;
 

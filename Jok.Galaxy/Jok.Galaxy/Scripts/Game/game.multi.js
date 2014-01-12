@@ -34,18 +34,18 @@ Game.Multi.prototype._close = function (e) {
 }
 
 Game.Multi.prototype._open = function (e) {
-    this._player.setIdle(true); /* allow creation of player's ship */
+    //this._player.setIdle(true); /* allow creation of player's ship */
 
-    /* send CREATE_PLAYER */
-    var player = this._player;
-    var data = {};
-    data[player.getId()] = {
-        name: player.getName(),
-        score: player.getScore(),
-        shipOptions: player.getShipOptions()
-    }
+    ///* send CREATE_PLAYER */
+    //var player = this._player;
+    //var data = {};
+    //data[player.getId()] = {
+    //    name: player.getName(),
+    //    score: player.getScore(),
+    //    shipOptions: player.getShipOptions()
+    //}
 
-    this._send(Game.MSG_CREATE_PLAYER, data);
+    //this._send(Game.MSG_CREATE_PLAYER, data);
 }
 
 Game.Multi.prototype._message = function (e) {
@@ -55,6 +55,21 @@ Game.Multi.prototype._message = function (e) {
     var currentDate = new Date();
 
     switch (data.type) {
+        case Game.MSG_LOGIN_SUCCESS:
+            this._player.setIdle(true); /* allow creation of player's ship */
+
+            /* send CREATE_PLAYER */
+            var player = this._player;
+            var data = {};
+            data[player.getId()] = {
+                name: player.getName(),
+                score: player.getScore(),
+                shipOptions: player.getShipOptions()
+            }
+
+            this._send(Game.MSG_CREATE_PLAYER, data);
+            break;
+
         case Game.MSG_SYNC:
         case Game.MSG_CHANGE:
             for (var id in data.data) {

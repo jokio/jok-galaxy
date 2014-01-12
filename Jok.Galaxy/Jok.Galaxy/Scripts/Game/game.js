@@ -26,6 +26,7 @@ Array.prototype.random = function() {
  * Base abstract game class
  */
 var Game = OZ.Class();
+Game.MSG_LOGIN_SUCCESS	= -1; /* player/ship state sync */
 Game.MSG_SYNC			= 0; /* player/ship state sync */
 Game.MSG_CREATE_PLAYER	= 1; /* new player(s) created */
 Game.MSG_CREATE_SHIP	= 2; /* new ship(s) created */
