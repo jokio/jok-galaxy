@@ -47,10 +47,10 @@ var $ = {
 
 /* Wrapper instance to get Game.Server */
 var ws = {
+    clients: {},
     isInitialized: false,
     initialize: function () {
         if (ws.isInitialized) return;
-
 
         new Game.Server(ws).start();
     },
@@ -59,23 +59,27 @@ var ws = {
         ws.isInitialized = true;
 
         if (ws.gameServer.onidle) {
-            setInterval(ws.gameServer.onidle.bind(ws.gameServer), 1000 / 60 /*FPS*/);
+            setInterval(function () {
+                ws.gameServer.onidle.call(ws.gameServer);
+            }, 1000 / 60 /*FPS*/);
         }
     },
     send: function (id, data) {
-        if (!(id in clients)) { return; }
+        if (!(id in this.clients)) { return; }
         if (!clients[id].readyState == 'open') { return; }
 
         // console.log('sending', id, data)
 
         clients[id].send(data);
+
+        return true;
     },
     setDebug: function () {
 
     },
     updateScore: function (dead_id, killer_id) {
 
-        if (!(killer_id in clients)) { return; }
+        if (!(killer_id in this.clients)) { return; }
         var userid = clients[killer_id].userid;
 
         $.get('/game/' + userid + '/GalaxyRatingAdd?secret=sercet');
@@ -96,7 +100,7 @@ function originIsAllowed(origin) {
 }
 
 var userTricks = 0;
-var clients = [];
+var clients = ws.clients;
 
 server.on('connection', function (socket) {
 
@@ -135,13 +139,13 @@ server.on('connection', function (socket) {
         connection.nick = result.Nick;
         connection.clientid = result.UserID; //Math.random().toString().replace("0.", "");
         var oldClient = clients[connection.clientid];
-        clients[connection.clientid] = connection;
-
         if (oldClient) {
             console.log('[Reconnect]', oldClient.clientid);
-            disconnect(oldClient);
             oldClient.close();
+            disconnect(oldClient);
         }
+
+        clients[connection.clientid] = connection;
 
         ws.gameServer.onconnect(connection.clientid, socket.transport.request.headers);
 

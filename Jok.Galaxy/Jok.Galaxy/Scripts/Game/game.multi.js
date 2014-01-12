@@ -31,6 +31,9 @@ Game.Multi.prototype._close = function (e) {
     setTimeout(function () {
         _this.start();
     }, 2000)
+
+    if (this.pingInterval)
+        clearInterval(this.pingInterval);
 }
 
 Game.Multi.prototype._open = function (e) {
@@ -68,6 +71,11 @@ Game.Multi.prototype._message = function (e) {
             }
 
             this._send(Game.MSG_CREATE_PLAYER, data);
+
+            var _this = this;
+            this.pingInterval = setInterval(function () {
+                _this._send(Game.MSG_PING, Date.now(), true);
+            }, 3000);
             break;
 
         case Game.MSG_SYNC:
@@ -86,17 +94,21 @@ Game.Multi.prototype._message = function (e) {
                     continue;
                 }
 
+                var isCurrentPlayer = false;
                 if (data.type == Game.MSG_SYNC) {
-                    if ((currentPlayer == player))
-                        // && (currentPlayer.lastUpdateTime && currentDate - currentPlayer.lastUpdateTime < 10000)) 
-                    {
-                        continue;
-                    }
 
-                    currentPlayer.lastUpdateTime = currentDate;
+                    isCurrentPlayer = (currentPlayer == player);
+
+                    //if (false)
+                    //    // && (currentPlayer.lastUpdateTime && currentDate - currentPlayer.lastUpdateTime < 10000)) 
+                    //{
+                    //    continue;
+                    //}
+
+                    //currentPlayer.lastUpdateTime = currentDate;
                 }
 
-                this._mergeShip(ship, playerData);
+                this._mergeShip(ship, playerData, isCurrentPlayer);
             }
             break;
 
@@ -170,8 +182,12 @@ Game.Multi.prototype._message = function (e) {
             this._removePlayer(player.getId());
             break;
 
+        case Game.MSG_PONG:
+            console.log('Latency', Date.now() - data.data);
+            break;
+
         default:
-            alert("Unknown message type " + data.type);
+            console.warn("Unknown message type " + data.type);
             break;
     }
 }
@@ -207,24 +223,26 @@ Game.Multi.prototype._keyboardChange = function (e) {
 /**
  * Merge ship data with existing ship
  */
-Game.Multi.prototype._mergeShip = function (ship, data) {
+Game.Multi.prototype._mergeShip = function (ship, data, isCurrentPlayer) {
     var diff = 0;
 
-    if (data.control) {
-        var control = ship.getControl();
-        for (var p in data.control) { control[p] = data.control[p]; }
-    }
-    if (data.phys) {
-        var phys = ship.getPhys();
-        for (var p in data.phys) {
-            /*
-			if (p == "position") {
-				var dx = data.phys[p][0] - phys[p][0];
-				var dy = data.phys[p][1] - phys[p][1];
-				diff += Math.sqrt(dx*dx+dy*dy);
-			}
-			*/
-            phys[p] = data.phys[p];
+    if (!isCurrentPlayer) {
+        if (data.control) {
+            var control = ship.getControl();
+            for (var p in data.control) { control[p] = data.control[p]; }
+        }
+        if (data.phys) {
+            var phys = ship.getPhys();
+            for (var p in data.phys) {
+                /*
+                if (p == "position") {
+                    var dx = data.phys[p][0] - phys[p][0];
+                    var dy = data.phys[p][1] - phys[p][1];
+                    diff += Math.sqrt(dx*dx+dy*dy);
+                }
+                */
+                phys[p] = data.phys[p];
+            }
         }
     }
 

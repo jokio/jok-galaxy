@@ -7,7 +7,7 @@ Game.Server.prototype.init = function (ws, options) {
     Game.prototype.init.call(this);
 
     this._options = {
-        idle: 500,
+        idle: 10000,
         stats: 5000
     }
     for (var p in options) { this._options[p] = options[p]; }
@@ -20,8 +20,8 @@ Game.Server.prototype.init = function (ws, options) {
         stats: 0
     };
 
-    this._clients = [];
-    this._clientPlayers = [];
+    //this._clients = [];
+    //this._clientPlayers = [];
 
     this._ws.addApplication(this);
 
@@ -39,8 +39,8 @@ Game.Server.prototype.start = function () {
 }
 
 Game.Server.prototype.onconnect = function (client, headers) {
-    this._clients.push(client);
-    this._clientPlayers.push(null);
+    //this._clients.push(client);
+    //this._clientPlayers.push(null);
 
     /* send CREATE_PLAYER */
     var playerData = {};
@@ -72,17 +72,23 @@ Game.Server.prototype.onconnect = function (client, headers) {
 }
 
 Game.Server.prototype.ondisconnect = function (client, code, message) {
-    var index = this._clients.indexOf(client);
-    if (index == -1) {
-        this._debug("Disconnecting non-existant client " + client);
-        return;
-    }
+    //var index = this._clients.indexOf(client);
+    //if (index == -1) {
+    //    this._debug("Disconnecting non-existant client " + client);
+    //    return;
+    //}
 
-    this._clients.splice(index, 1);
-    var player = this._clientPlayers[index];
-    this._clientPlayers.splice(index, 1);
+    //this._clients.splice(index, 1);
+    //var player = this._clientPlayers[index];
+    //this._clientPlayers.splice(index, 1);
+    //if (!player) {
+    //    this._debug("Disconnecting client with undefined player " + client);
+    //    return;
+    //}
+
+    var player = this._players[client];
     if (!player) {
-        this._debug("Disconnecting client with undefined player " + client);
+        this._debug("Disconnecting non-existant client " + client);
         return;
     }
 
@@ -97,21 +103,21 @@ Game.Server.prototype.onmessage = function (client, data, nick) {
             for (var id in parsed.data) {
                 var playerData = parsed.data[id];
 
-                if (id in this._players) {
-                    this._debug("[create player] cannot re-create player " + this._players[id].getName());
+                if (client in this._players) {
+                    this._debug("[create player] cannot re-create player " + this._players[client].getName());
                     continue;
                 }
 
-                var index = this._clients.indexOf(client);
-                if (this._clientPlayers[index]) {
-                    this._debug("[create player] client " + client + " already defined a player");
-                    continue;
-                }
+                //var index = this._clients.indexOf(client);
+                //if (this._clientPlayers[index]) {
+                //    this._debug("[create player] client " + client + " already defined a player");
+                //    continue;
+                //}
 
                 this._debug("[create player] creating player " + JSON.stringify(playerData));
-                var player = this._addPlayer(Player, nick, id);
+                var player = this._addPlayer(Player, nick, client);
                 player.setShipOptions(playerData.shipOptions);
-                this._clientPlayers[index] = player;
+                //this._clientPlayers[index] = player;
             }
             break;
 
@@ -119,9 +125,9 @@ Game.Server.prototype.onmessage = function (client, data, nick) {
             for (var id in parsed.data) {
                 var playerData = parsed.data[id];
 
-                var player = this._players[id];
+                var player = this._players[client];
                 if (!player) {
-                    this._debug("[create ship] player " + id + " does not exist");
+                    this._debug("[create ship] player " + client + " does not exist");
                     continue;
                 }
 
@@ -139,7 +145,7 @@ Game.Server.prototype.onmessage = function (client, data, nick) {
         case Game.MSG_CHANGE:
             for (var id in parsed.data) {
                 var playerData = parsed.data[id];
-                var player = this._players[id];
+                var player = this._players[client];
                 if (!player) {
                     this._debug("[change] player " + id + " not available");
                     continue;
@@ -155,18 +161,32 @@ Game.Server.prototype.onmessage = function (client, data, nick) {
             }
             break;
 
+        case Game.MSG_PING:
+            this._ws.send(client, JSON.stringify({
+                type: Game.MSG_PONG,
+                data: parsed.data
+            }));
+            break;
+
         default:
             this._debug("Unknown message type " + parsed.type);
             break;
     }
 
-    if (parsed.type == Game.MSG_CHANGE) { return; }
+    if (parsed.type == Game.MSG_PING) { return; }
 
 
     /* forward message to all other clients */
-    for (var i = 0; i < this._clients.length; i++) {
-        var id = this._clients[i];
-        this._ws.send(id, data);
+    //for (var i = 0; i < this._clients.length; i++) {
+    //    var id = this._clients[i];
+    //    this._ws.send(id, data);
+    //}
+
+    for (var i in this._players) {
+
+        var id = this._players[i].getId();
+        if (id != client)
+            this._ws.send(id, data);
     }
 }
 
@@ -177,6 +197,8 @@ Game.Server.prototype.onidle = function () {
     var ts = Date.now();
 
     if (ts - this._ts.idle > this._options.idle) { /* send sync info to all clients */
+
+        console.log('idle stuff', ts - this._ts.idle);
         this._ts.idle = ts;
 
         // ადრე იყო ყველას ეგზავნებოდა საერთო სტეიტი 500 მილიწამში ერთხელ, შეიცვალა და ეხლა ყველას ეგზავნება მხოლოდ საკუთარი 5 წამში ერთხელ
@@ -191,16 +213,28 @@ Game.Server.prototype.onidle = function () {
 
 
         // ყველასთვის საკუთარი სტეიტის გაგზავნა
-        for (var i = 0; i < this._clients.length; i++) {
+        //for (var i = 0; i < this._clients.length; i++) {
 
-            // var ship = this._players[id].getShip();
+        //    // var ship = this._players[id].getShip();
 
-            // var data[id] = {
-            // 	phys: ship.getPhys(),
-            // 	control: ship.getControl()
-            // }
+        //    // var data[id] = {
+        //    // 	phys: ship.getPhys(),
+        //    // 	control: ship.getControl()
+        //    // }
+        //    try {
+        //        this._ws.send(this._clients[i], data);
+        //    }
+        //    catch (err) {
+        //        console.log('err omg ', err.message)
+        //    }
+        //}
+
+        for (var i in this._players) {
+            var id = this._players[i].getId();
+
             try {
-                this._ws.send(this._clients[i], data);
+                var isSuccess = this._ws.send(id, data);
+                console.log('idle stuff sending', isSuccess);
             }
             catch (err) {
                 console.log('err omg ', err.message)
@@ -279,20 +313,30 @@ Game.Server.prototype._shipDeath = function (e) {
 
 
     var str = JSON.stringify(data);
-    for (var i = 0; i < this._clients.length; i++) {
-        this._ws.send(this._clients[i], str);
+    //for (var i = 0; i < this._clients.length; i++) {
+    //    this._ws.send(this._clients[i], str);
 
-        if (this._clientPlayers[i]) {
-            if (this._clientPlayers[i]._id == data.data.target)
-                deadShip = this._clients[i];
+    //    if (this._clientPlayers[i]) {
+    //        if (this._clientPlayers[i]._id == data.data.target)
+    //            deadShip = this._clients[i];
 
-            if (this._clientPlayers[i]._id == data.data.enemy)
-                killerShip = this._clients[i];
-        }
+    //        if (this._clientPlayers[i]._id == data.data.enemy)
+    //            killerShip = this._clients[i];
+    //    }
+    //}
+
+    for (var i in this._players) {
+        var id = this._players[i].getId();
+
+        this._ws.send(id, str);
+
+        if (id == data.data.target)
+            deadShip = id;
+
+        if (id == data.data.enemy)
+            killerShip = id;
     }
 
-    // var deadShip = this._clients.indexOf(data.data.target);
-    // var killerShip = this._clients.indexOf(data.data.enemy);
     if (e.data.enemy)
         this._ws.updateScore(deadShip, killerShip);
 }
@@ -313,8 +357,12 @@ Game.Server.prototype._removePlayer = function (id) {
     }
     data = JSON.stringify(data);
 
-    for (var i = 0; i < this._clients.length; i++) {
-        var client = this._clients[i];
+    //for (var i = 0; i < this._clients.length; i++) {
+    //    var client = this._clients[i];
+    //    this._ws.send(client, data);
+    //}
+    for (var i in this._players) {
+        var client = this._players[i].getId();
         this._ws.send(client, data);
     }
 

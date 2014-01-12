@@ -26,13 +26,15 @@ Array.prototype.random = function() {
  * Base abstract game class
  */
 var Game = OZ.Class();
-Game.MSG_LOGIN_SUCCESS	= -1; /* player/ship state sync */
+Game.MSG_LOGIN_SUCCESS	= -1; /* authorization */
 Game.MSG_SYNC			= 0; /* player/ship state sync */
 Game.MSG_CREATE_PLAYER	= 1; /* new player(s) created */
 Game.MSG_CREATE_SHIP	= 2; /* new ship(s) created */
 Game.MSG_CHANGE			= 3; /* ship params changed */
 Game.MSG_DESTROY_SHIP	= 4; /* player's ship destroyed */
-Game.MSG_DESTROY_PLAYER	= 5; /* player left game */
+Game.MSG_DESTROY_PLAYER = 5; /* player left game */
+Game.MSG_PING           = 6;
+Game.MSG_PONG           = 7;
 
 Game.LAYER_BG			= "bg";
 Game.LAYER_SHIPS		= "ships";
