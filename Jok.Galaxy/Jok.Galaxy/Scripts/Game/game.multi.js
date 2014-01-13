@@ -20,6 +20,9 @@ Game.Multi.prototype.start = function () {
     OZ.Event.add(this._socket, "open", this._open.bind(this));
     OZ.Event.add(this._socket, "close", this._close.bind(this));
     OZ.Event.add(this._socket, "message", this._message.bind(this));
+
+    $('#Connecting').html('Connecting...');
+    $('#Connecting').show();
 }
 
 Game.Multi.prototype._close = function (e) {
@@ -34,6 +37,10 @@ Game.Multi.prototype._close = function (e) {
 
     if (this.pingInterval)
         clearInterval(this.pingInterval);
+
+
+    $('#Connecting').html('No connection to server');
+    $('#Connecting').show();
 }
 
 Game.Multi.prototype._open = function (e) {
@@ -49,6 +56,9 @@ Game.Multi.prototype._open = function (e) {
     //}
 
     //this._send(Game.MSG_CREATE_PLAYER, data);
+
+    $('#Connecting').hide();
+
 }
 
 Game.Multi.prototype._message = function (e) {
