@@ -80,7 +80,7 @@ var ui = {
 		};
 
 		var url = 'ws://galaxy-server-eu.jok.io:80';
-		var url = 'ws://localhost:9003';
+		//var url = 'ws://localhost:9003';
 
 		game = new Game.Multi(jok.config.nick, ship, url, jok.config.userID);
 		game.start();
