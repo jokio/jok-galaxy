@@ -198,7 +198,6 @@ Game.Server.prototype.onidle = function () {
 
     if (ts - this._ts.idle > this._options.idle) { /* send sync info to all clients */
 
-        console.log('idle stuff', ts - this._ts.idle);
         this._ts.idle = ts;
 
         // ადრე იყო ყველას ეგზავნებოდა საერთო სტეიტი 500 მილიწამში ერთხელ, შეიცვალა და ეხლა ყველას ეგზავნება მხოლოდ საკუთარი 5 წამში ერთხელ
@@ -234,7 +233,6 @@ Game.Server.prototype.onidle = function () {
 
             try {
                 var isSuccess = this._ws.send(id, data);
-                console.log('idle stuff sending', isSuccess);
             }
             catch (err) {
                 console.log('err omg ', err.message)

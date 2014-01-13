@@ -90,10 +90,12 @@ ws.initialize();
 
 /* Web Server */
 var engine = require('engine.io');
-var server = new engine.listen(port, function () {
+var server = engine.listen(port, function () {
     console.log('Server is listening on port ' + port);
 });
 
+server.pingInterval = 10000;
+server.pingTimeout = 25000;
 
 function originIsAllowed(origin) {
     return true;
@@ -120,7 +122,7 @@ server.on('connection', function (socket) {
         return;
     }
 
-    socket.isDisconnected = false
+    socket.isDisconnected = false;
 
     var ipaddress = socket.transport.request.headers['x-forwarded-for'];
     if (!ipaddress)
@@ -160,13 +162,14 @@ server.on('connection', function (socket) {
     }, true);
 
 
+
     socket.on('close', function (reasonCode, description) {
-        console.log('[close]', reasonCode, description);
+        //console.log('[close]', reasonCode, description);
         disconnect(socket);
     });
 
     socket.on('error', function (err) {
-        console.log('[Error]', err);
+        //console.log('[Error]', err);
         disconnect(socket);
     });
 
@@ -181,13 +184,11 @@ server.on('connection', function (socket) {
         }
 
         if (process.env.ENV != 'production') {
-            console.log(Date.now(), '[Disconnect] Peer ' + conn.clientid + ' disconnected.');
+            //console.log(Date.now(), '[Disconnect] Peer ' + conn.clientid + ' disconnected.');
         }
         ws.gameServer.ondisconnect(conn.clientid, '', '');
     }
 });
-
-
 
 // ws.gameServer.onconnect(connection.clientid, request.httpRequest.headers);
 // ws.gameServer.onmessage(connection.clientid, message.utf8Data);

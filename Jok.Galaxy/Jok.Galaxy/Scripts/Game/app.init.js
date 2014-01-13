@@ -15,7 +15,6 @@ var document = {
 
 var navigator = { userAgent: "" };
 var createjs = {};
-global.setTimeout = function () { };
 
 /* read all javascript files */
 //var html = fs.readFileSync(__dirname + '/index.html', 'utf-8');
